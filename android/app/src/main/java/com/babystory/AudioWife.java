@@ -27,7 +27,7 @@ public class AudioWife {
     /***
      * Keep a single copy of this in memory unless required to create a new instance explicitly.
      ****/
-    private static AudioWife mAudioWife;
+    private volatile static AudioWife mAudioWife;
 
     /****
      * Playback progress update time in milliseconds
@@ -80,7 +80,11 @@ public class AudioWife {
     public static AudioWife getInstance() {
 
         if (mAudioWife == null) {
-            mAudioWife = new AudioWife();
+            synchronized (AudioWife.class) {
+                if (mAudioWife == null) {
+                    mAudioWife = new AudioWife();
+                }
+            }
         }
 
         return mAudioWife;

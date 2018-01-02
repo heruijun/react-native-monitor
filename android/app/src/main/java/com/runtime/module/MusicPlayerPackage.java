@@ -25,6 +25,5 @@ public class MusicPlayerPackage implements ReactPackage {
         return Arrays.<ViewManager>asList(
                 new ReactMusicPlayer()
         );
-
     }
 }
