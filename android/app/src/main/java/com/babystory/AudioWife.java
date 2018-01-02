@@ -39,7 +39,7 @@ public class AudioWife {
     private static final String ERROR_PLAYTIME_CURRENT_NEGATIVE = "Current playback time cannot be negative";
     private static final String ERROR_PLAYTIME_TOTAL_NEGATIVE = "Total playback time cannot be negative";
 
-    private Handler mProgressUpdateHandler;
+    private static Handler mProgressUpdateHandler;
     private MediaPlayer mMediaPlayer;
     private SeekBar mSeekBar;
     private TextView mPlaybackTime;
@@ -55,11 +55,6 @@ public class AudioWife {
      * Indicates the total duration of the audio being played.
      */
     private TextView mTotalTime;
-
-    /***
-     * Set if AudioWife is using the default UI provided with the library.
-     * **/
-    private boolean mHasDefaultUi;
 
     /****
      * Array to hold custom completion listeners
@@ -222,7 +217,7 @@ public class AudioWife {
 
         mPlaybackTime.setText(playbackStr);
 
-        // DebugLog.i(currentTime + " / " + totalDuration);
+        // Log.e("time: ",currentTime + " / " + totalDuration);
     }
 
     private void updateRuntime(int currentTime) {
@@ -312,31 +307,26 @@ public class AudioWife {
     }
 
     public AudioWife init(FileDescriptor fd, long startOffset, long length) {
-
         if (fd == null) {
             throw new IllegalArgumentException("assets address cannot be null");
         }
-
         if (mAudioWife == null) {
             mAudioWife = new AudioWife();
         }
-
         this.fd = fd;
-
         mProgressUpdateHandler = new Handler();
-
         initLocalFilePlayer(startOffset, length);
 
         return this;
     }
 
     private void initLocalFilePlayer(long startOffset, long length) {
-
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
         try {
             mMediaPlayer.setDataSource(fd, startOffset, length);
+            mMediaPlayer.prepare();
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         } catch (SecurityException e) {
@@ -349,47 +339,26 @@ public class AudioWife {
             e.printStackTrace();
         }
 
-        try {
-            mMediaPlayer.prepare();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         mMediaPlayer.setOnCompletionListener(mOnCompletion);
     }
 
     public AudioWife init(Context ctx, Uri uri) {
-
         if (uri == null) {
             throw new IllegalArgumentException("Uri cannot be null");
         }
-
         if (mAudioWife == null) {
             mAudioWife = new AudioWife();
         }
-
         mUri = uri;
-
         mProgressUpdateHandler = new Handler();
-
         initPlayer(ctx);
 
         return this;
     }
 
     public AudioWife setPlayView(View play) {
-
         if (play == null) {
             throw new NullPointerException("PlayView cannot be null");
-        }
-
-        if (mHasDefaultUi) {
-            Log.w(TAG, "Already using default UI. Setting play view will have no effect");
-            return this;
         }
 
         mPlayButton = play;
@@ -431,11 +400,6 @@ public class AudioWife {
             throw new NullPointerException("PauseView cannot be null");
         }
 
-        if (mHasDefaultUi) {
-            Log.w(TAG, "Already using default UI. Setting pause view will have no effect");
-            return this;
-        }
-
         mPauseButton = pause;
 
         initOnPauseClick();
@@ -471,12 +435,6 @@ public class AudioWife {
     }
 
     public AudioWife setPlaytime(TextView playTime) {
-
-        if (mHasDefaultUi) {
-            Log.w(TAG, "Already using default UI. Setting play time will have no effect");
-            return this;
-        }
-
         mPlaybackTime = playTime;
 
         // initialize the playtime to 0
@@ -485,12 +443,6 @@ public class AudioWife {
     }
 
     public AudioWife setRuntimeView(TextView currentTime) {
-
-        if (mHasDefaultUi) {
-            Log.w(TAG, "Already using default UI. Setting play time will have no effect");
-            return this;
-        }
-
         mRunTime = currentTime;
 
         // initialize the playtime to 0
@@ -499,12 +451,6 @@ public class AudioWife {
     }
 
     public AudioWife setTotalTimeView(TextView totalTime) {
-
-        if (mHasDefaultUi) {
-            Log.w(TAG, "Already using default UI. Setting play time will have no effect");
-            return this;
-        }
-
         mTotalTime = totalTime;
 
         setTotalTime();
@@ -512,12 +458,6 @@ public class AudioWife {
     }
 
     public AudioWife setSeekBar(SeekBar seekbar) {
-
-        if (mHasDefaultUi) {
-            Log.w(TAG, "Already using default UI. Setting seek bar will have no effect");
-            return this;
-        }
-
         mSeekBar = seekbar;
         initMediaSeekBar();
         return this;
@@ -564,20 +504,11 @@ public class AudioWife {
 
         try {
             mMediaPlayer.setDataSource(ctx, mUri);
+            mMediaPlayer.prepare();
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         } catch (SecurityException e) {
             e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            mMediaPlayer.prepare();
         } catch (IllegalStateException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -593,15 +524,11 @@ public class AudioWife {
 
         @Override
         public void onCompletion(MediaPlayer mp) {
-            // set UI when audio finished playing
             int currentPlayTime = 0;
             mSeekBar.setProgress((int) currentPlayTime);
             updatePlaytime(currentPlayTime);
             updateRuntime(currentPlayTime);
             setPlayable();
-            // ensure that our completion listener fires first.
-            // This will provide the developer to over-ride our
-            // completion listener functionality
 
             fireCustomCompletionListeners(mp);
         }
@@ -616,17 +543,12 @@ public class AudioWife {
         // update seekbar
         long finalTime = mMediaPlayer.getDuration();
         mSeekBar.setMax((int) finalTime);
-
         mSeekBar.setProgress(0);
-
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 mMediaPlayer.seekTo(seekBar.getProgress());
-
-                // if the audio is paused and seekbar is moved,
-                // update the play time in the UI.
                 updateRuntime(seekBar.getProgress());
             }
 
@@ -653,7 +575,6 @@ public class AudioWife {
         setPauseView(playerUi.getPauseView());
         setSeekBar(playerUi.getSeekBar());
         setPlaytime(playerUi.getPlaytime());
-        mHasDefaultUi = true;
         return this;
     }
 
@@ -663,6 +584,7 @@ public class AudioWife {
             mMediaPlayer.reset();
             mMediaPlayer.release();
             mMediaPlayer = null;
+            mProgressUpdateHandler.removeCallbacks(mUpdateProgress);
             mProgressUpdateHandler = null;
         }
     }
