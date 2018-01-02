@@ -7,6 +7,7 @@ import {
   Text,
   View,
   NativeModules,
+  ActivityIndicator,
   TouchableOpacity,
   Image
 } from 'react-native';
@@ -34,6 +35,20 @@ export default class App extends Component<{}> {
 
   constructor(props){
     super(props)
+    this.state = {
+      data: [
+        {key: '1', up:{title: 'Devin'}, down:{title: 'Iron'}},
+        {key: '2', up:{title: 'Jackson'}, down:{title: 'James'}},
+        {key: '3', up:{title: 'Joel'}, down:{title: 'John'}},
+        {key: '4', up:{title: 'Herbert'}, down:{title: 'Tom'}},
+        {key: '5', up:{title: 'May'}, down:{title: 'Ray'}},
+        {key: '6', up:{title: 'TextView'}, down:{title: 'Button'}},
+        {key: '7', up:{title: 'View'}, down:{title: 'ViewGroup'}},
+        {key: '8', up:{title: 'ScrollView'}, down:{title: 'ListView'}},
+        {key: '9', up:{title: 'Image'}, down:{title: 'ImageView'}},
+        {key: '10', up:{title: 'ImageButton'}, down:{title: 'LinearLayout'}},
+      ]
+    }
   }
 
   onButtonPress() {
@@ -50,7 +65,35 @@ export default class App extends Component<{}> {
       up={item.up}
       down={item.down}
     />
-  );
+  )
+
+  _renderFooterView = () => {
+    return (
+      <View style={{height:260,width:60,justifyContent:'center'}}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )
+  }
+
+  _onEndReached = (info) => {
+    let appendData = [
+      {
+        key: new Date().getTime(),
+        up:{title: '新增数据'}, down:{title: '新增数据'}
+      },
+      {
+        key: new Date().getTime() + 1,
+        up:{title: '新增数据1'}, down:{title: '新增数据1'}
+      },
+      {
+        key: new Date().getTime() + 2,
+        up:{title: '新增数据2'}, down:{title: '新增数据2'}
+      },
+    ]
+    this.setState({
+      data: this.state.data.concat(appendData)
+    })
+  }
 
   render() {
     return (
@@ -83,24 +126,12 @@ export default class App extends Component<{}> {
           <View style={styles.itemList}>
             <FlatList
               ref='flatList'
-              data={[
-                {key: '1', up:{title: 'Devin'}, down:{title: 'Iron'}},
-                {key: '2', up:{title: 'Jackson'}, down:{title: 'James'}},
-                {key: '3', up:{title: 'Joel'}, down:{title: 'John'}},
-                {key: '4', up:{title: 'Herbert'}, down:{title: 'Tom'}},
-                {key: '5', up:{title: 'May'}, down:{title: 'Ray'}},
-                {key: '6', up:{title: 'TextView'}, down:{title: 'Button'}},
-                {key: '7', up:{title: 'View'}, down:{title: 'ViewGroup'}},
-                {key: '8', up:{title: 'ScrollView'}, down:{title: 'ListView'}},
-                {key: '9', up:{title: 'Image'}, down:{title: 'ImageView'}},
-                {key: '10', up:{title: 'ImageButton'}, down:{title: 'LinearLayout'}},
-              ]}
+              data={this.state.data}
               horizontal={true}
               renderItem={this._renderItem}
               onEndReachedThreshold={0.1}
-              onEndReached={(info) => {
-                alert("滑动到底部了")
-              }}
+              onEndReached={this._onEndReached}
+              ListFooterComponent={this._renderFooterView}
               />
           </View>
         </View>
