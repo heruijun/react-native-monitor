@@ -7,6 +7,7 @@ import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
 import com.runtime.base.RNApplication;
 import com.runtime.module.CustomPackage;
+import com.runtime.module.MusicPlayerPackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -24,6 +25,7 @@ public class MainApplication extends RNApplication implements ReactApplication {
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(
                     new MainReactPackage(),
+                    new MusicPlayerPackage(),
                     new CustomPackage()
             );
         }

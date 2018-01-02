@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Image
 } from 'react-native';
+import RCTMusicPlayer from './MusicPlayer'
 
 class MyListItem extends Component {
   render() {
@@ -100,9 +101,7 @@ export default class App extends Component<{}> {
       <View style={styles.container}>
         <View style={styles.menu}>
           <Button onPress={this.onButtonPress} title="请选择孩子的年龄"/>
-          <Button onPress={this.onButtonPress} title="播放历史"/>
-          <Button onPress={this.onButtonPress} title="订阅"/>
-          <Button onPress={this.onButtonPress} title="下载"/>
+          <RCTMusicPlayer style={{width: 300, height: 50}} beginPlay={true}/>
           <Button onPress={this._onMonitorPress} title="截图监测" color="red" />
         </View>
         <View style={styles.content}>

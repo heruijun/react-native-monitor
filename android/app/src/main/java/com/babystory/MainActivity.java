@@ -12,4 +12,10 @@ public class MainActivity extends ReactActivity {
     protected String getMainComponentName() {
         return "BabyStory";
     }
+
+    @Override
+    public void invokeDefaultOnBackPressed() {
+        super.invokeDefaultOnBackPressed();
+        AudioWife.getInstance().release();
+    }
 }
