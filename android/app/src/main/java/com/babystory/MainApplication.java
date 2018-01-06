@@ -5,9 +5,9 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
-import com.runtime.base.RNApplication;
-import com.runtime.module.CustomPackage;
-import com.runtime.module.MusicPlayerPackage;
+import com.heruijun.reactnativerumtime.base.RNApplication;
+import com.babystory.module.CustomPackage;
+import com.babystory.module.MusicPlayerPackage;
 
 import java.util.Arrays;
 import java.util.List;

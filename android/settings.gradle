@@ -1,3 +1,3 @@
 rootProject.name = 'BabyStory'
 
-include ':app'
+include ':App', ':ReactNativeRumtime'

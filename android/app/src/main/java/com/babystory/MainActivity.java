@@ -1,6 +1,7 @@
 package com.babystory;
 
 import com.facebook.react.ReactActivity;
+import com.babystory.components.AudioWife;
 
 public class MainActivity extends ReactActivity {
 
