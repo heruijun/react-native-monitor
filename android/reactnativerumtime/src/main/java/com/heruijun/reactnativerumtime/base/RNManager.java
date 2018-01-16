@@ -1,10 +1,15 @@
 package com.heruijun.reactnativerumtime.base;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 
 import com.heruijun.reactnativerumtime.inc.RNEvent;
+import com.heruijun.reactnativerumtime.pcmonitor.ClientServer;
+import com.heruijun.reactnativerumtime.pcmonitor.Router;
+import com.heruijun.reactnativerumtime.util.RNLog;
 import com.heruijun.reactnativerumtime.viewcrawler.ViewCrawler;
 
 import java.util.Collections;
@@ -23,6 +28,9 @@ public class RNManager {
     private final RNConfig mConfig;
     private final Context mContext;
     private ViewCrawler mViewCrawler;
+    private static final int DEFAULT_PORT = 5391;
+    private static boolean isMonitorOnPC = false;
+    private static ClientServer sClientServer;
 
     public RNManager(Context mContext, RNConfig config) {
         this.mContext = mContext;
@@ -57,6 +65,29 @@ public class RNManager {
         }
     }
 
+    public static synchronized void monitorOnPC(Context context) {
+        monitorOnPC(context, DEFAULT_PORT);
+    }
+
+    public static synchronized void monitorOnPC(Context context, int port) {
+        if (isMonitorOnPC) {
+            return;
+        }
+        isMonitorOnPC = true;
+        if (context == null) {
+            throw new IllegalStateException("context can not be null.");
+        }
+        Context applicationContext = context.getApplicationContext();
+        Router.get().init(applicationContext);
+        initServer(applicationContext, port);
+    }
+
+    private static void initServer(Context context, int port) {
+        sClientServer = new ClientServer(port);
+        sClientServer.start();
+        RNLog.d("addresslog: ", getAddressLog(context, port));
+    }
+
     private void registerViewCrawler() {
         mViewCrawler = new ViewCrawler(mContext, this);
     }
@@ -67,5 +98,17 @@ public class RNManager {
 
     public Map<String, String> getDeviceInfo() {
         return mDeviceInfo;
+    }
+
+    private static String getAddressLog(Context context, int port) {
+        @SuppressLint("WifiManagerPotentialLeak")
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        int ipAddress = wifiManager != null ? wifiManager.getConnectionInfo().getIpAddress() : 0;
+        @SuppressLint("DefaultLocale") final String formattedIpAddress = String.format("%d.%d.%d.%d",
+                (ipAddress & 0xff),
+                (ipAddress >> 8 & 0xff),
+                (ipAddress >> 16 & 0xff),
+                (ipAddress >> 24 & 0xff));
+        return "Open dashboard [ http://" + formattedIpAddress + ":" + port + " ] in your browser , if can not open it , make sure device and pc are on the same network segment";
     }
 }

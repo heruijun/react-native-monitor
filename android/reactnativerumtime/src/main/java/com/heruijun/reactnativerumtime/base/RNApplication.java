@@ -24,5 +24,6 @@ public class RNApplication extends Application {
         super.onCreate();
         instance = this;
         mRNManager = RNManager.getInstance(getApplicationContext());
+        RNManager.monitorOnPC(this);
     }
 }
